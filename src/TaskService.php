@@ -6,10 +6,12 @@ class TaskService
 {
   
 
-  public function __construct()
+  public function __construct($hash)
   {
+    $this->mongoDbHost = $hash['mongo_db_host'];
+    $this->redisHost = $hash['redis_host'];
     $this->collectionName = 'url_tasks';
-    $this->mongoConnection = new \MongoClient();
+    $this->mongoConnection = new \MongoClient($this->mongoDbHost);
     $this->mongoDb = $this->mongoConnection->whenever_scheduler;
     
     $name = $this->collectionName;
@@ -89,13 +91,13 @@ class TaskService
 
   public function resetQueue($queueName)
   {
-      $redis = new \Predis\Client();
+      $redis = new \Predis\Client('tcp://'.$this->redisHost.':6379');
       $redis->set('Scheduler_Queue_'.$queueName, 0);
   }
 
   public function executeNextSingleShot($queueName, $maxParallel, $force)
   {
-    $redis = new \Predis\Client();
+      $redis = new \Predis\Client('tcp://'.$this->redisHost.':6379');
     
     $lastExecution = $redis->get('Scheduler_Queue_'.$queueName.'_Last_Execution');
     if (($lastExecution + 3600*4) < time())

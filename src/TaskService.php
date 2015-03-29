@@ -12,7 +12,8 @@ class TaskService
     $this->redisHost = $hash['redis_host'];
     $this->collectionName = 'url_tasks';
     $this->mongoConnection = new \MongoClient($this->mongoDbHost);
-    $this->mongoDb = $this->mongoConnection->whenever_scheduler;
+    $this->mongoDb = $this->mongoConnection->selectDB($hash['mongo_db_name']);
+    //$this->mongoConnection->whenever_scheduler;
     
     $name = $this->collectionName;
     $this->collection = $this->mongoDb->$name;
